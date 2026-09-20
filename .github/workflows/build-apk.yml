@@ -22,12 +22,24 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Restore debug keystore
+      - name: Prepare debug keystore
         run: |
           if [ -f debug.keystore.base64 ]; then
             echo "Restoring debug.keystore from debug.keystore.base64..."
             base64 -d debug.keystore.base64 > debug.keystore
+          elif [ ! -f debug.keystore ]; then
+            echo "Generating debug.keystore for CI build..."
+            keytool -genkeypair -v \
+              -keystore debug.keystore \
+              -alias androiddebugkey \
+              -keypass android \
+              -storepass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
           fi
+          ls -la debug.keystore
 
       - name: Create fallback .env file
         run: |
