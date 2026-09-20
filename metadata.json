@@ -1,0 +1,6 @@
+{
+  "name": "Hotspot Trigger",
+  "description": "Automatically turns on Wi-Fi hotspot whenever notifications are received, persisting across device reboots.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
