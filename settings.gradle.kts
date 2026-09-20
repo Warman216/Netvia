@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Hotspot Trigger"
+rootProject.name = "netvia"
 
 include(":app")
