@@ -2,9 +2,6 @@ package com.example.service
 
 import android.content.Context
 import android.content.Intent
-import android.net.wifi.WifiManager
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
@@ -40,8 +37,7 @@ sealed class HotspotState {
 object HotspotManager {
     private const val TAG = "HotspotManager"
 
-    // ACTION_TETHER_SETTINGS is not exposed by all compile SDK stubs, although
-    // Android recognizes this public settings action at runtime.
+    // This action is public at runtime but is absent from some Android compile SDK stubs.
     private const val ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS"
 
     private val _hotspotState = MutableStateFlow<HotspotState>(HotspotState.Idle)
@@ -65,19 +61,17 @@ object HotspotManager {
         _hotspotState.value = HotspotState.Starting(initiatedBy = triggeredBy)
 
         try {
-            // This is the public Android path for a normal app to let the user
-            // enable internet tethering. Credentials remain managed by Android.
-            val intent = Intent(ACTION_TETHER_SETTINGS).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            appContext.startActivity(intent)
+            openTetheringSettings(appContext)
 
-            val message = "Open Android Hotspot & Tethering settings to enable internet sharing"
+            val message =
+                "Open Android Hotspot & Tethering settings to enable internet sharing"
             Log.i(TAG, message)
             _hotspotState.value = HotspotState.Error(message, ERROR_USER_ACTION_REQUIRED)
             onResult?.invoke(false, message)
         } catch (e: Exception) {
-            val message = "Unable to open Hotspot & Tethering settings: ${e.localizedMessage ?: "Unknown error"}"
+            val message =
+                "Unable to open Hotspot & Tethering settings: " +
+                    (e.localizedMessage ?: "Unknown error")
             Log.e(TAG, message, e)
             _hotspotState.value = HotspotState.Error(message, ERROR_SETTINGS_UNAVAILABLE)
             onResult?.invoke(false, message)
@@ -103,17 +97,19 @@ object HotspotManager {
     }
 
     fun openTetheringSettings(context: Context) {
+        val appContext = context.applicationContext
         try {
-            context.startActivity(Intent(ACTION_TETHER_SETTINGS).apply {
+            appContext.startActivity(Intent(ACTION_TETHER_SETTINGS).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             })
         } catch (e: Exception) {
             try {
-                context.startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS).apply {
+                appContext.startActivity(Intent(Settings.ACTION_WIRELESS_SETTINGS).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 })
-            } catch (ex: Exception) {
-                Log.e(TAG, "Could not open tethering settings", ex)
+            } catch (fallbackException: Exception) {
+                Log.e(TAG, "Could not open tethering settings", fallbackException)
+                throw fallbackException
             }
         }
     }
