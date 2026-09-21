@@ -45,9 +45,11 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PlayArrow
@@ -60,11 +62,22 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiTethering
 import androidx.compose.material.icons.outlined.CheckCircleOutline
 import androidx.compose.material.icons.outlined.WifiTetheringOff
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import com.example.ui.components.CustomizeCredentialsModal
+import com.example.ui.components.HotspotCredentialsCard
+import com.example.ui.components.LiquidGlassSquircleCard
+import com.example.ui.components.SquircleCard
+import com.example.ui.components.SquircleLarge
+import com.example.ui.components.SquircleMedium
+import com.example.ui.components.SquircleSmall
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -115,8 +128,6 @@ import com.example.data.AppPreferences
 import com.example.data.TriggerLogEntity
 import com.example.service.HotspotManager
 import com.example.service.HotspotState
-import com.example.ui.theme.EmeraldActive
-import com.example.ui.theme.RoseError
 import com.example.util.PermissionHelper
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -139,12 +150,15 @@ fun HotspotScreen(
     val cooldownSeconds by viewModel.cooldownSeconds.collectAsState()
     val notifyOnTrigger by viewModel.notifyOnTrigger.collectAsState()
     val vibrateOnTrigger by viewModel.vibrateOnTrigger.collectAsState()
+    val customSsid by viewModel.customSsid.collectAsState()
+    val customPassword by viewModel.customPassword.collectAsState()
     val recentLogs by viewModel.recentLogs.collectAsState()
     val installedApps by viewModel.installedApps.collectAsState()
 
     var showAppPickerDialog by remember { mutableStateOf(false) }
     var showInfoDialog by remember { mutableStateOf(false) }
     var showSimulateDialog by remember { mutableStateOf(false) }
+    var showCredentialsDialog by remember { mutableStateOf(false) }
 
     // Re-check permissions whenever app returns to foreground
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
@@ -241,7 +255,16 @@ fun HotspotScreen(
                 )
             }
 
-            // 2. Health & Boot Resilience Status Card
+            // 2. Network Credentials Card (Customizable SSID & Password in Liquid Glass Squircle)
+            item {
+                HotspotCredentialsCard(
+                    customSsid = customSsid,
+                    customPassword = customPassword,
+                    onConfigureClick = { showCredentialsDialog = true }
+                )
+            }
+
+            // 3. Health & Boot Resilience Status Card
             item {
                 HealthStatusCard(
                     healthStatus = healthStatus,
@@ -359,6 +382,21 @@ fun HotspotScreen(
         InfoModal(onDismiss = { showInfoDialog = false })
     }
 
+    // Customize Credentials Dialog
+    if (showCredentialsDialog) {
+        CustomizeCredentialsModal(
+            initialSsid = customSsid,
+            initialPassword = customPassword,
+            onSave = { newSsid, newPassword ->
+                viewModel.updateCustomSsid(newSsid)
+                viewModel.updateCustomPassword(newPassword)
+                showCredentialsDialog = false
+                Toast.makeText(context, "Hotspot credentials saved: $newSsid", Toast.LENGTH_SHORT).show()
+            },
+            onDismiss = { showCredentialsDialog = false }
+        )
+    }
+
     // Simulate Notification Dialog
     if (showSimulateDialog) {
         SimulateNotificationModal(
@@ -456,7 +494,7 @@ fun HeroStatusCard(
                     .background(
                         Brush.verticalGradient(
                             colors = if (isActive) {
-                                listOf(EmeraldActive.copy(alpha = 0.15f), MaterialTheme.colorScheme.surfaceVariant)
+                                listOf(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f), MaterialTheme.colorScheme.surfaceVariant)
                             } else if (isStarting) {
                                 listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), MaterialTheme.colorScheme.surfaceVariant)
                             } else {
@@ -480,7 +518,7 @@ fun HeroStatusCard(
                                     .size(52.dp)
                                     .scale(pulseScale)
                                     .clip(CircleShape)
-                                    .background(EmeraldActive.copy(alpha = 0.25f))
+                                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f))
                             )
                         }
                         Box(
@@ -488,7 +526,7 @@ fun HeroStatusCard(
                                 .size(44.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (isActive) EmeraldActive else if (isStarting) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+                                    if (isActive) MaterialTheme.colorScheme.secondary else if (isStarting) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -511,9 +549,9 @@ fun HeroStatusCard(
                             else -> if (isAutoEnabled) "STANDBY (MONITORING)" else "IDLE"
                         }
                         val stateColor = when (hotspotState) {
-                            is HotspotState.Active -> EmeraldActive
+                            is HotspotState.Active -> MaterialTheme.colorScheme.secondary
                             is HotspotState.Starting -> MaterialTheme.colorScheme.primary
-                            is HotspotState.Error -> RoseError
+                            is HotspotState.Error -> MaterialTheme.colorScheme.error
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         }
 
@@ -567,7 +605,7 @@ fun HeroStatusCard(
                                 Text(
                                     text = hotspotState.message,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = RoseError,
+                                    color = MaterialTheme.colorScheme.error,
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -598,8 +636,8 @@ fun HeroStatusCard(
                             .weight(1f)
                             .testTag("stop_hotspot_button"),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = RoseError,
-                            contentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
                         )
                     ) {
                         Icon(imageVector = Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -766,7 +804,7 @@ fun HealthCheckRow(
         Icon(
             imageVector = if (isOk) Icons.Default.CheckCircle else Icons.Default.Warning,
             contentDescription = null,
-            tint = if (isOk) EmeraldActive else RoseError,
+            tint = if (isOk) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error,
             modifier = Modifier.size(20.dp)
         )
 
@@ -1044,7 +1082,7 @@ fun LogItemCard(log: TriggerLogEntity) {
                     .size(36.dp)
                     .clip(CircleShape)
                     .background(
-                        if (log.wasHotspotTriggered) EmeraldActive.copy(alpha = 0.15f)
+                        if (log.wasHotspotTriggered) MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
                         else MaterialTheme.colorScheme.surfaceVariant
                     ),
                 contentAlignment = Alignment.Center
@@ -1052,7 +1090,7 @@ fun LogItemCard(log: TriggerLogEntity) {
                 Icon(
                     imageVector = if (log.wasHotspotTriggered) Icons.Default.WifiTethering else Icons.Default.Notifications,
                     contentDescription = null,
-                    tint = if (log.wasHotspotTriggered) EmeraldActive else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (log.wasHotspotTriggered) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -1090,7 +1128,7 @@ fun LogItemCard(log: TriggerLogEntity) {
                 Text(
                     text = log.statusMessage,
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (log.wasHotspotTriggered) EmeraldActive else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (log.wasHotspotTriggered) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

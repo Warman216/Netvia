@@ -2,19 +2,39 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Tech-Forward Network Palette: Deep Space Blue & Vibrant Electric Cyan / Amber
-val Cyan80 = Color(0xFF38BDF8)
-val CyanGrey80 = Color(0xFF94A3B8)
-val Amber80 = Color(0xFFFBBF24)
+// Apple iOS System Palette (San Francisco / Cupertino Design System)
+// System Accents
+val AppleBlue = Color(0xFF007AFF)
+val AppleBlueDark = Color(0xFF0A84FF)
+val AppleGreen = Color(0xFF34C759)
+val AppleGreenDark = Color(0xFF30D158)
+val AppleIndigo = Color(0xFF5856D6)
+val AppleOrange = Color(0xFFFF9500)
+val AppleRed = Color(0xFFFF3B30)
+val AppleRedDark = Color(0xFFFF453A)
+val AppleTeal = Color(0xFF5AC8FA)
 
-val Cyan40 = Color(0xFF0284C7)
-val CyanGrey40 = Color(0xFF475569)
-val Amber40 = Color(0xFFD97706)
+// iOS Backgrounds & Surfaces (Light mode)
+val AppleSystemGroupedBackgroundLight = Color(0xFFF2F2F7)
+val AppleSystemBackgroundLight = Color(0xFFFFFFFF)
+val AppleSecondarySystemGroupedBackgroundLight = Color(0xFFFFFFFF)
+val AppleLabelLight = Color(0xFF000000)
+val AppleSecondaryLabelLight = Color(0xFF6C6C70)
+val AppleTertiaryLabelLight = Color(0xFF8E8E93)
+val AppleSeparatorLight = Color(0xFFE5E5EA)
+val AppleFillLight = Color(0xFF787880).copy(alpha = 0.16f)
 
-val Navy900 = Color(0xFF0B1120)
-val Navy800 = Color(0xFF0F172A)
-val Navy700 = Color(0xFF1E293B)
-val Navy600 = Color(0xFF334155)
+// iOS Backgrounds & Surfaces (Dark mode)
+val AppleSystemGroupedBackgroundDark = Color(0xFF000000)
+val AppleSystemBackgroundDark = Color(0xFF1C1C1E)
+val AppleSecondarySystemGroupedBackgroundDark = Color(0xFF2C2C2E)
+val AppleLabelDark = Color(0xFFFFFFFF)
+val AppleSecondaryLabelDark = Color(0xFFEBEBF5).copy(alpha = 0.60f)
+val AppleTertiaryLabelDark = Color(0xFFEBEBF5).copy(alpha = 0.30f)
+val AppleSeparatorDark = Color(0xFF38383A)
+val AppleFillDark = Color(0xFF787880).copy(alpha = 0.32f)
 
-val EmeraldActive = Color(0xFF10B981)
-val RoseError = Color(0xFFF43F5E)
+// Compatibility aliases for active states
+val EmeraldActive = AppleGreen
+val RoseError = AppleRed
+

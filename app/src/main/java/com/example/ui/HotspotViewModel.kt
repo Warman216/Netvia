@@ -70,6 +70,12 @@ class HotspotViewModel(application: Application) : AndroidViewModel(application)
     private val _vibrateOnTrigger = MutableStateFlow(preferences.vibrateOnTrigger)
     val vibrateOnTrigger: StateFlow<Boolean> = _vibrateOnTrigger.asStateFlow()
 
+    private val _customSsid = MutableStateFlow(preferences.customSsid)
+    val customSsid: StateFlow<String> = _customSsid.asStateFlow()
+
+    private val _customPassword = MutableStateFlow(preferences.customPassword)
+    val customPassword: StateFlow<String> = _customPassword.asStateFlow()
+
     private val _totalTriggers = MutableStateFlow(preferences.totalTriggersCount)
     val totalTriggers: StateFlow<Int> = _totalTriggers.asStateFlow()
 
@@ -225,6 +231,19 @@ class HotspotViewModel(application: Application) : AndroidViewModel(application)
     fun setVibrateOnTrigger(vibrate: Boolean) {
         preferences.vibrateOnTrigger = vibrate
         _vibrateOnTrigger.value = vibrate
+    }
+
+    fun updateCustomSsid(ssid: String) {
+        val trimmed = ssid.trim()
+        if (trimmed.isNotEmpty()) {
+            preferences.customSsid = trimmed
+            _customSsid.value = trimmed
+        }
+    }
+
+    fun updateCustomPassword(password: String) {
+        preferences.customPassword = password
+        _customPassword.value = password
     }
 
     fun clearLogs() {
