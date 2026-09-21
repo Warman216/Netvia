@@ -437,15 +437,12 @@ fun HeroStatusCard(
         label = "pulseScale"
     )
 
-    Card(
+    LiquidGlassSquircleCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("hero_status_card"),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = SquircleCard,
+        accentGlow = if (isActive) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
     ) {
         Column(
             modifier = Modifier
@@ -632,6 +629,7 @@ fun HeroStatusCard(
                 if (isActive) {
                     Button(
                         onClick = onStopHotspot,
+                        shape = SquircleMedium,
                         modifier = Modifier
                             .weight(1f)
                             .testTag("stop_hotspot_button"),
@@ -647,6 +645,7 @@ fun HeroStatusCard(
                 } else {
                     Button(
                         onClick = onStartHotspot,
+                        shape = SquircleMedium,
                         modifier = Modifier
                             .weight(1f)
                             .testTag("start_hotspot_button")
@@ -659,6 +658,7 @@ fun HeroStatusCard(
 
                 OutlinedButton(
                     onClick = onSimulateNotification,
+                    shape = SquircleMedium,
                     modifier = Modifier
                         .weight(1f)
                         .testTag("simulate_notification_button")
@@ -702,14 +702,11 @@ fun HealthStatusCard(
     onOpenNotificationAccess: () -> Unit,
     onOpenBatteryOptimization: () -> Unit
 ) {
-    Card(
+    LiquidGlassSquircleCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("health_status_card"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        shape = SquircleCard
     ) {
         Column(
             modifier = Modifier
@@ -855,12 +852,11 @@ fun TriggerRulesCard(
     onToggleNotify: (Boolean) -> Unit,
     onToggleVibrate: (Boolean) -> Unit
 ) {
-    Card(
+    LiquidGlassSquircleCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("trigger_rules_card"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = SquircleCard
     ) {
         Column(
             modifier = Modifier
@@ -1066,10 +1062,9 @@ fun LogItemCard(log: TriggerLogEntity) {
     val formatter = remember { SimpleDateFormat("MMM d, HH:mm:ss", Locale.getDefault()) }
     val formattedTime = remember(log.timestamp) { formatter.format(Date(log.timestamp)) }
 
-    Card(
+    LiquidGlassSquircleCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = SquircleSmall
     ) {
         Row(
             modifier = Modifier
@@ -1139,10 +1134,9 @@ fun LogItemCard(log: TriggerLogEntity) {
 
 @Composable
 fun EmptyLogPlaceholder(onSimulate: () -> Unit) {
-    Card(
+    LiquidGlassSquircleCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = SquircleCard
     ) {
         Column(
             modifier = Modifier
