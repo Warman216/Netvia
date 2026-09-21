@@ -45,14 +45,6 @@ class AppPreferences(context: Context) {
         get() = prefs.getLong(KEY_LAST_TRIGGER_TIMESTAMP, 0L)
         set(value) = prefs.edit().putLong(KEY_LAST_TRIGGER_TIMESTAMP, value).apply()
 
-    var customSsid: String
-        get() = prefs.getString(KEY_CUSTOM_SSID, "netvia-hotspot") ?: "netvia-hotspot"
-        set(value) = prefs.edit().putString(KEY_CUSTOM_SSID, value).apply()
-
-    var customPassword: String
-        get() = prefs.getString(KEY_CUSTOM_PASSWORD, "netvia1234") ?: "netvia1234"
-        set(value) = prefs.edit().putString(KEY_CUSTOM_PASSWORD, value).apply()
-
     var totalTriggersCount: Int
         get() = prefs.getInt(KEY_TOTAL_TRIGGERS_COUNT, 0)
         set(value) = prefs.edit().putInt(KEY_TOTAL_TRIGGERS_COUNT, value).apply()
@@ -73,8 +65,6 @@ class AppPreferences(context: Context) {
         const val KEY_NOTIFY_ON_TRIGGER = "notify_on_trigger"
         const val KEY_VIBRATE_ON_TRIGGER = "vibrate_on_trigger"
         const val KEY_LAST_TRIGGER_TIMESTAMP = "last_trigger_timestamp"
-        const val KEY_CUSTOM_SSID = "custom_ssid"
-        const val KEY_CUSTOM_PASSWORD = "custom_password"
         const val KEY_TOTAL_TRIGGERS_COUNT = "total_triggers_count"
 
         const val FILTER_MODE_ALL = "ALL"
