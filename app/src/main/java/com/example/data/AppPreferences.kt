@@ -41,6 +41,14 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_VIBRATE_ON_TRIGGER, true)
         set(value) = prefs.edit().putBoolean(KEY_VIBRATE_ON_TRIGGER, value).apply()
 
+    var customSsid: String
+        get() = prefs.getString(KEY_CUSTOM_SSID, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_CUSTOM_SSID, value).apply()
+
+    var customPassword: String
+        get() = prefs.getString(KEY_CUSTOM_PASSWORD, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_CUSTOM_PASSWORD, value).apply()
+
     var lastTriggerTimestamp: Long
         get() = prefs.getLong(KEY_LAST_TRIGGER_TIMESTAMP, 0L)
         set(value) = prefs.edit().putLong(KEY_LAST_TRIGGER_TIMESTAMP, value).apply()
@@ -64,6 +72,8 @@ class AppPreferences(context: Context) {
         const val KEY_COOLDOWN_SECONDS = "cooldown_seconds"
         const val KEY_NOTIFY_ON_TRIGGER = "notify_on_trigger"
         const val KEY_VIBRATE_ON_TRIGGER = "vibrate_on_trigger"
+        const val KEY_CUSTOM_SSID = "custom_ssid"
+        const val KEY_CUSTOM_PASSWORD = "custom_password"
         const val KEY_LAST_TRIGGER_TIMESTAMP = "last_trigger_timestamp"
         const val KEY_TOTAL_TRIGGERS_COUNT = "total_triggers_count"
 
