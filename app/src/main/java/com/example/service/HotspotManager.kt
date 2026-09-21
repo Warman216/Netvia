@@ -2,6 +2,9 @@ package com.example.service
 
 import android.content.Context
 import android.content.Intent
+import android.net.wifi.WifiManager
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +39,9 @@ sealed class HotspotState {
  */
 object HotspotManager {
     private const val TAG = "HotspotManager"
-    // Settings.ACTION_TETHER_SETTINGS is not exposed by all Android SDK stubs.
+
+    // ACTION_TETHER_SETTINGS is not exposed by all compile SDK stubs, although
+    // Android recognizes this public settings action at runtime.
     private const val ACTION_TETHER_SETTINGS = "android.settings.TETHER_SETTINGS"
 
     private val _hotspotState = MutableStateFlow<HotspotState>(HotspotState.Idle)
@@ -60,7 +65,8 @@ object HotspotManager {
         _hotspotState.value = HotspotState.Starting(initiatedBy = triggeredBy)
 
         try {
-            // Credentials remain managed by Android; the user enables tethering.
+            // This is the public Android path for a normal app to let the user
+            // enable internet tethering. Credentials remain managed by Android.
             val intent = Intent(ACTION_TETHER_SETTINGS).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
