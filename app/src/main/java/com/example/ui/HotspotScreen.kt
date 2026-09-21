@@ -78,6 +78,12 @@ import com.example.ui.components.SquircleCard
 import com.example.ui.components.SquircleLarge
 import com.example.ui.components.SquircleMedium
 import com.example.ui.components.SquircleSmall
+import com.example.ui.components.VibrantMeshGradientBackground
+import com.example.ui.theme.GradientCyan
+import com.example.ui.theme.GradientElectricBlue
+import com.example.ui.theme.GradientMagenta
+import com.example.ui.theme.GradientViolet
+import com.example.ui.theme.GradientSunsetPink
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -172,31 +178,45 @@ fun HotspotScreen(
         viewModel.refreshHealthStatus()
     }
 
-    Scaffold(
+    val isHotspotActive = hotspotState is HotspotState.Active
+
+    VibrantMeshGradientBackground(
         modifier = modifier.fillMaxSize(),
-        topBar = {
+        isHotspotActive = isHotspotActive
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            topBar = {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                .size(38.dp)
+                                .clip(SquircleSmall)
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(GradientElectricBlue, GradientCyan)
+                                    )
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.WifiTethering,
                                 contentDescription = "Hotspot Icon",
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = Color.White,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "netvia",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                text = "NetVia",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 0.5.sp
+                                )
                             )
                             Text(
                                 text = "Notification Auto-Start • Boot Resilient",
@@ -227,7 +247,7 @@ fun HotspotScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -367,6 +387,7 @@ fun HotspotScreen(
             item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
+    }
 
     // App Picker Dialog
     if (showAppPickerDialog) {
@@ -487,17 +508,44 @@ fun HeroStatusCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(SquircleMedium)
                     .background(
-                        Brush.verticalGradient(
-                            colors = if (isActive) {
-                                listOf(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f), MaterialTheme.colorScheme.surfaceVariant)
-                            } else if (isStarting) {
-                                listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), MaterialTheme.colorScheme.surfaceVariant)
-                            } else {
-                                listOf(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-                            }
-                        )
+                        if (isActive) {
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color(0xFF00E5FF).copy(alpha = 0.22f),
+                                    Color(0xFF00E676).copy(alpha = 0.18f),
+                                    Color(0xFF0066FF).copy(alpha = 0.12f)
+                                )
+                            )
+                        } else if (isStarting) {
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    GradientViolet.copy(alpha = 0.25f),
+                                    GradientElectricBlue.copy(alpha = 0.20f)
+                                )
+                            )
+                        } else {
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                )
+                            )
+                        }
+                    )
+                    .border(
+                        width = 1.dp,
+                        brush = if (isActive) {
+                            Brush.horizontalGradient(
+                                listOf(Color(0xFF00E5FF).copy(alpha = 0.6f), Color(0xFF00E676).copy(alpha = 0.6f))
+                            )
+                        } else {
+                            Brush.horizontalGradient(
+                                listOf(Color.White.copy(alpha = 0.15f), Color.Transparent)
+                            )
+                        },
+                        shape = SquircleMedium
                     )
                     .padding(16.dp)
             ) {
@@ -512,10 +560,18 @@ fun HeroStatusCard(
                         if (isActive) {
                             Box(
                                 modifier = Modifier
-                                    .size(52.dp)
+                                    .size(54.dp)
                                     .scale(pulseScale)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f))
+                                    .background(
+                                        Brush.radialGradient(
+                                            listOf(
+                                                Color(0xFF00E5FF).copy(alpha = 0.45f),
+                                                Color(0xFF00E676).copy(alpha = 0.15f),
+                                                Color.Transparent
+                                            )
+                                        )
+                                    )
                             )
                         }
                         Box(
@@ -523,7 +579,22 @@ fun HeroStatusCard(
                                 .size(44.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (isActive) MaterialTheme.colorScheme.secondary else if (isStarting) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+                                    if (isActive) {
+                                        Brush.linearGradient(
+                                            listOf(Color(0xFF00E5FF), Color(0xFF00B09B))
+                                        )
+                                    } else if (isStarting) {
+                                        Brush.linearGradient(
+                                            listOf(GradientViolet, GradientElectricBlue)
+                                        )
+                                    } else {
+                                        Brush.linearGradient(
+                                            listOf(
+                                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f),
+                                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+                                            )
+                                        )
+                                    }
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -627,32 +698,58 @@ fun HeroStatusCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (isActive) {
-                    Button(
-                        onClick = onStopHotspot,
-                        shape = SquircleMedium,
+                    Box(
                         modifier = Modifier
                             .weight(1f)
-                            .testTag("stop_hotspot_button"),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError
-                        )
+                            .clip(SquircleMedium)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color(0xFFFF3B30), Color(0xFFFF453A))
+                                )
+                            )
                     ) {
-                        Icon(imageVector = Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Turn Off")
+                        Button(
+                            onClick = onStopHotspot,
+                            shape = SquircleMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("stop_hotspot_button"),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Icon(imageVector = Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Turn Off", fontWeight = FontWeight.Bold)
+                        }
                     }
                 } else {
-                    Button(
-                        onClick = onStartHotspot,
-                        shape = SquircleMedium,
+                    Box(
                         modifier = Modifier
                             .weight(1f)
-                            .testTag("start_hotspot_button")
+                            .clip(SquircleMedium)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(GradientElectricBlue, GradientCyan)
+                                )
+                            )
                     ) {
-                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text("Turn On")
+                        Button(
+                            onClick = onStartHotspot,
+                            shape = SquircleMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("start_hotspot_button"),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Turn On", fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
 
@@ -706,7 +803,8 @@ fun HealthStatusCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("health_status_card"),
-        shape = SquircleCard
+        shape = SquircleCard,
+        accentGlow = if (healthStatus.hasNotificationAccess && healthStatus.hasLocationOrNearby) GradientCyan else GradientSunsetPink
     ) {
         Column(
             modifier = Modifier
@@ -856,7 +954,8 @@ fun TriggerRulesCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("trigger_rules_card"),
-        shape = SquircleCard
+        shape = SquircleCard,
+        accentGlow = GradientViolet
     ) {
         Column(
             modifier = Modifier
@@ -1064,7 +1163,8 @@ fun LogItemCard(log: TriggerLogEntity) {
 
     LiquidGlassSquircleCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = SquircleSmall
+        shape = SquircleSmall,
+        accentGlow = if (log.wasHotspotTriggered) GradientCyan else null
     ) {
         Row(
             modifier = Modifier
@@ -1075,17 +1175,27 @@ fun LogItemCard(log: TriggerLogEntity) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .clip(CircleShape)
+                    .clip(SquircleSmall)
                     .background(
-                        if (log.wasHotspotTriggered) MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
-                        else MaterialTheme.colorScheme.surfaceVariant
+                        if (log.wasHotspotTriggered) {
+                            Brush.linearGradient(
+                                listOf(GradientCyan.copy(alpha = 0.25f), Color(0xFF00E676).copy(alpha = 0.15f))
+                            )
+                        } else {
+                            Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.surfaceVariant,
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                )
+                            )
+                        }
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = if (log.wasHotspotTriggered) Icons.Default.WifiTethering else Icons.Default.Notifications,
                     contentDescription = null,
-                    tint = if (log.wasHotspotTriggered) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (log.wasHotspotTriggered) GradientCyan else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -1123,7 +1233,7 @@ fun LogItemCard(log: TriggerLogEntity) {
                 Text(
                     text = log.statusMessage,
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (log.wasHotspotTriggered) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (log.wasHotspotTriggered) Color(0xFF00E5FF) else MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1136,7 +1246,8 @@ fun LogItemCard(log: TriggerLogEntity) {
 fun EmptyLogPlaceholder(onSimulate: () -> Unit) {
     LiquidGlassSquircleCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = SquircleCard
+        shape = SquircleCard,
+        accentGlow = GradientElectricBlue
     ) {
         Column(
             modifier = Modifier
@@ -1146,16 +1257,20 @@ fun EmptyLogPlaceholder(onSimulate: () -> Unit) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .size(52.dp)
+                    .clip(SquircleMedium)
+                    .background(
+                        Brush.linearGradient(
+                            listOf(GradientElectricBlue.copy(alpha = 0.25f), GradientCyan.copy(alpha = 0.15f))
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
+                    tint = GradientCyan,
+                    modifier = Modifier.size(26.dp)
                 )
             }
 
@@ -1291,7 +1406,7 @@ fun InfoModal(onDismiss: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(imageVector = Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("How netvia Works", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                Text("How NetVia Works", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
             }
         },
         text = {

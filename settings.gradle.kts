@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "netvia"
+rootProject.name = "NetVia"
 
 include(":app")

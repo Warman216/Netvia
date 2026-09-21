@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">netvia</string>
-    <string name="notification_service_label">netvia Hotspot Trigger Service</string>
+    <string name="app_name">NetVia</string>
+    <string name="notification_service_label">NetVia Hotspot Trigger Service</string>
     <string name="channel_name_monitor">Hotspot Monitor &amp; Controls</string>
     <string name="channel_desc_monitor">Persistent monitoring service for auto-hotspot on notifications</string>
     <string name="channel_name_triggers">Trigger Alerts</string>

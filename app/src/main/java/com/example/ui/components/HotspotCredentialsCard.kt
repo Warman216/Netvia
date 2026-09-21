@@ -1,7 +1,9 @@
 package com.example.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +18,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
@@ -31,6 +37,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.theme.GradientCyan
+import com.example.ui.theme.GradientElectricBlue
+import com.example.ui.theme.GradientMagenta
+import com.example.ui.theme.GradientViolet
 
 /**
  * Liquid Glass Squircle Card displaying and configuring customizable SSID and Password
@@ -75,18 +85,32 @@ fun HotspotCredentialsCard(
                     )
                 }
 
-                Button(
-                    onClick = onConfigureClick,
-                    modifier = Modifier.testTag("edit_credentials_button"),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                Box(
+                    modifier = Modifier
+                        .clip(SquircleSmall)
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(GradientViolet, GradientElectricBlue)
+                            )
+                        )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = null,
-                        modifier = Modifier.size(15.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = "Customize", style = MaterialTheme.typography.labelSmall)
+                    Button(
+                        onClick = onConfigureClick,
+                        modifier = Modifier.testTag("edit_credentials_button"),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.White
+                        ),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(text = "Customize", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
 
@@ -98,7 +122,7 @@ fun HotspotCredentialsCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // SSID Tile (Liquid glass inner squircle)
+            // SSID Tile (Liquid glass inner squircle with gradient rim)
             LiquidGlassSquircleCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -106,6 +130,7 @@ fun HotspotCredentialsCard(
                         clipboardManager.setText(AnnotatedString(customSsid))
                     },
                 shape = SquircleMedium,
+                accentGlow = GradientElectricBlue,
                 tint = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Row(
@@ -119,12 +144,24 @@ fun HotspotCredentialsCard(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Wifi,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(SquircleSmall)
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(GradientElectricBlue.copy(alpha = 0.25f), GradientCyan.copy(alpha = 0.15f))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Wifi,
+                                contentDescription = null,
+                                tint = GradientCyan,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
@@ -150,7 +187,7 @@ fun HotspotCredentialsCard(
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
                             contentDescription = "Copy SSID",
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = GradientCyan,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -159,7 +196,7 @@ fun HotspotCredentialsCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Password Tile (Liquid glass inner squircle)
+            // Password Tile (Liquid glass inner squircle with gradient rim)
             LiquidGlassSquircleCard(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -167,6 +204,7 @@ fun HotspotCredentialsCard(
                         clipboardManager.setText(AnnotatedString(customPassword))
                     },
                 shape = SquircleMedium,
+                accentGlow = GradientViolet,
                 tint = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Row(
@@ -180,12 +218,24 @@ fun HotspotCredentialsCard(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(22.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(SquircleSmall)
+                                .background(
+                                    Brush.linearGradient(
+                                        listOf(GradientViolet.copy(alpha = 0.25f), GradientMagenta.copy(alpha = 0.15f))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = GradientMagenta,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
@@ -214,7 +264,7 @@ fun HotspotCredentialsCard(
                         Icon(
                             imageVector = Icons.Default.ContentCopy,
                             contentDescription = "Copy Password",
-                            tint = MaterialTheme.colorScheme.secondary,
+                            tint = GradientMagenta,
                             modifier = Modifier.size(16.dp)
                         )
                     }
