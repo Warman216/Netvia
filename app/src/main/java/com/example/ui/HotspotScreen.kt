@@ -73,6 +73,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import com.example.ui.components.CustomizeCredentialsModal
 import com.example.ui.components.HotspotCredentialsCard
+import com.example.ui.components.HotspotModeSelectorCard
 import com.example.ui.components.LiquidGlassSquircleCard
 import com.example.ui.components.SquircleCard
 import com.example.ui.components.SquircleLarge
@@ -158,6 +159,7 @@ fun HotspotScreen(
     val vibrateOnTrigger by viewModel.vibrateOnTrigger.collectAsState()
     val customSsid by viewModel.customSsid.collectAsState()
     val customPassword by viewModel.customPassword.collectAsState()
+    val hotspotMode by viewModel.hotspotMode.collectAsState()
     val recentLogs by viewModel.recentLogs.collectAsState()
     val installedApps by viewModel.installedApps.collectAsState()
 
@@ -267,6 +269,7 @@ fun HotspotScreen(
                     hotspotState = hotspotState,
                     isAutoEnabled = isAutoEnabled,
                     healthStatus = healthStatus,
+                    hotspotMode = hotspotMode,
                     onToggleAuto = { viewModel.toggleAutoHotspot(it) },
                     onStartHotspot = { viewModel.startManualHotspot() },
                     onStopHotspot = { viewModel.stopManualHotspot() },
@@ -275,7 +278,15 @@ fun HotspotScreen(
                 )
             }
 
-            // 2. Network Credentials Card (Customizable SSID & Password in Liquid Glass Squircle)
+            // 2. Hotspot Mode Selector Card (Internet Sharing vs Local-Only)
+            item {
+                HotspotModeSelectorCard(
+                    currentMode = hotspotMode,
+                    onModeSelected = { viewModel.setHotspotMode(it) }
+                )
+            }
+
+            // 3. Network Credentials Card (Customizable SSID & Password in Liquid Glass Squircle)
             item {
                 HotspotCredentialsCard(
                     customSsid = customSsid,
@@ -436,6 +447,7 @@ fun HeroStatusCard(
     hotspotState: HotspotState,
     isAutoEnabled: Boolean,
     healthStatus: HealthStatus,
+    hotspotMode: String,
     onToggleAuto: (Boolean) -> Unit,
     onStartHotspot: () -> Unit,
     onStopHotspot: () -> Unit,
@@ -611,8 +623,8 @@ fun HeroStatusCard(
 
                     Column(modifier = Modifier.weight(1f)) {
                         val stateLabel = when (hotspotState) {
-                            is HotspotState.Active -> "HOTSPOT ACTIVE"
-                            is HotspotState.Starting -> "STARTING HOTSPOT…"
+                            is HotspotState.Active -> if (hotspotState.isInternetSharing) "🌐 INTERNET SHARING ACTIVE" else "📲 LOCAL P2P HOTSPOT ACTIVE"
+                            is HotspotState.Starting -> if (hotspotState.isInternetSharing) "STARTING INTERNET HOTSPOT…" else "STARTING LOCAL HOTSPOT…"
                             is HotspotState.Error -> "ERROR STARTING"
                             else -> if (isAutoEnabled) "STANDBY (MONITORING)" else "IDLE"
                         }

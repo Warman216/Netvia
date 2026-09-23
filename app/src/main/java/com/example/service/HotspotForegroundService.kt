@@ -26,13 +26,14 @@ class HotspotForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        HotspotManager.initialize(this)
         createNotificationChannels()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_STOP_HOTSPOT -> {
-                HotspotManager.stopHotspot()
+                HotspotManager.stopHotspot(this)
                 updateNotificationInternal()
             }
             ACTION_UPDATE_NOTIFICATION -> {
@@ -80,15 +81,17 @@ class HotspotForegroundService : Service() {
 
         val (title, contentText, isHotspotOn) = when (currentState) {
             is HotspotState.Active -> {
+                val modeTitle = if (currentState.isInternetSharing) "Internet Sharing Active" else "Local Hotspot Active"
                 val passInfo = if (currentState.password.isNotEmpty()) " • Key: ${currentState.password}" else ""
                 Triple(
-                    "Hotspot Active: ${currentState.ssid}",
+                    "$modeTitle: ${currentState.ssid}",
                     "Triggered by ${currentState.triggeredBy}$passInfo",
                     true
                 )
             }
             is HotspotState.Starting -> {
-                Triple("Starting Wi-Fi Hotspot…", "Triggered by ${currentState.initiatedBy}", false)
+                val modeTitle = if (currentState.isInternetSharing) "Internet Sharing Hotspot" else "Local Hotspot"
+                Triple("Starting $modeTitle…", "Triggered by ${currentState.initiatedBy}", false)
             }
             else -> {
                 val filterText = if (prefs.filterMode == AppPreferences.FILTER_MODE_ALL) "All apps" else "${prefs.selectedPackages.size} app(s)"

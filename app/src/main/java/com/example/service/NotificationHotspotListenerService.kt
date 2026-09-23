@@ -32,6 +32,7 @@ class NotificationHotspotListenerService : NotificationListenerService() {
         super.onCreate()
         preferences = AppPreferences(this)
         database = AppDatabase.getInstance(this)
+        HotspotManager.initialize(this)
         Log.i(TAG, "NotificationHotspotListenerService created")
     }
 

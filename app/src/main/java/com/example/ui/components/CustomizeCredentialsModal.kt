@@ -1,5 +1,9 @@
 package com.example.ui.components
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,16 +16,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,12 +43,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.service.HotspotManager
+import kotlin.random.Random
 
 /**
  * Cupertino Squircle modal dialog for customizing Hotspot SSID and Password
@@ -49,12 +63,23 @@ fun CustomizeCredentialsModal(
     onSave: (ssid: String, password: String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var ssid by remember { mutableStateOf(initialSsid) }
-    var password by remember { mutableStateOf(initialPassword) }
+    val context = LocalContext.current
+    var ssid by remember(initialSsid) { mutableStateOf(initialSsid) }
+    var password by remember(initialPassword) { mutableStateOf(initialPassword) }
     var showPassword by remember { mutableStateOf(false) }
 
     val isSsidValid = ssid.trim().isNotEmpty()
     val isPasswordValid = password.length >= 8
+
+    fun generateRandomPassword() {
+        val chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+        val randomStr = (1..10)
+            .map { chars[Random.nextInt(chars.length)] }
+            .joinToString("")
+        password = "netvia-$randomStr"
+        showPassword = true
+        Toast.makeText(context, "Generated strong password", Toast.LENGTH_SHORT).show()
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -69,7 +94,7 @@ fun CustomizeCredentialsModal(
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Configure Hotspot",
+                    text = "Configure Hotspot Credentials",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }
@@ -80,7 +105,7 @@ fun CustomizeCredentialsModal(
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Text(
-                    text = "Set the network broadcast name and security password used when activating your hotspot.",
+                    text = "Set your desired Wi-Fi network name and security password for Internet Sharing and auto-triggered hotspot.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -90,7 +115,7 @@ fun CustomizeCredentialsModal(
                     value = ssid,
                     onValueChange = { ssid = it },
                     label = { Text("Network Name (SSID)") },
-                    placeholder = { Text("e.g. netvia-hotspot") },
+                    placeholder = { Text("e.g. NetVia-Hotspot") },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Wifi,
@@ -104,7 +129,7 @@ fun CustomizeCredentialsModal(
                         if (!isSsidValid) {
                             Text("SSID cannot be empty", color = MaterialTheme.colorScheme.error)
                         } else {
-                            Text("Visible to connecting devices")
+                            Text("Name broadcasted to connecting devices")
                         }
                     },
                     shape = SquircleMedium,
@@ -119,7 +144,7 @@ fun CustomizeCredentialsModal(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Hotspot Password") },
-                    placeholder = { Text("At least 8 characters") },
+                    placeholder = { Text("Minimum 8 characters") },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Lock,
@@ -128,11 +153,21 @@ fun CustomizeCredentialsModal(
                         )
                     },
                     trailingIcon = {
-                        IconButton(onClick = { showPassword = !showPassword }) {
-                            Icon(
-                                imageVector = if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (showPassword) "Hide password" else "Show password"
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { generateRandomPassword() }) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoFixHigh,
+                                    contentDescription = "Generate strong password",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            IconButton(onClick = { showPassword = !showPassword }) {
+                                Icon(
+                                    imageVector = if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = if (showPassword) "Hide password" else "Show password"
+                                )
+                            }
                         }
                     },
                     visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
@@ -140,9 +175,12 @@ fun CustomizeCredentialsModal(
                     isError = !isPasswordValid,
                     supportingText = {
                         if (!isPasswordValid) {
-                            Text("WPA2 requires at least 8 characters", color = MaterialTheme.colorScheme.error)
+                            Text(
+                                "Password too short: ${password.length}/8 characters (WPA2 requires >= 8)",
+                                color = MaterialTheme.colorScheme.error
+                            )
                         } else {
-                            Text("WPA2-PSK security passphrase")
+                            Text("${password.length} characters (Valid WPA2/WPA3 passphrase)")
                         }
                     },
                     shape = SquircleMedium,
@@ -159,6 +197,37 @@ fun CustomizeCredentialsModal(
                     )
                 )
 
+                // Quick action: Save & Configure in Android System Settings
+                FilledTonalButton(
+                    onClick = {
+                        if (isSsidValid && isPasswordValid) {
+                            onSave(ssid.trim(), password)
+                            try {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("Hotspot Password", password)
+                                clipboard.setPrimaryClip(clip)
+                                Toast.makeText(
+                                    context,
+                                    "Password copied! Paste into System Hotspot Settings.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            } catch (_: Exception) {}
+                            HotspotManager.openTetheringSettings(context)
+                        }
+                    },
+                    enabled = isSsidValid && isPasswordValid,
+                    shape = SquircleMedium,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.OpenInNew,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Copy & Configure in Android Hotspot")
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
@@ -171,7 +240,7 @@ fun CustomizeCredentialsModal(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Android's Wi-Fi Tethering service will preserve these credentials as your preferred network configuration.",
+                        text = "Your password is saved directly in NetVia and applied across all hotspot sessions.",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -189,11 +258,21 @@ fun CustomizeCredentialsModal(
                 shape = SquircleMedium,
                 modifier = Modifier.testTag("save_credentials_button")
             ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text("Save Credentials")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                shape = SquircleMedium,
+                modifier = Modifier.testTag("cancel_credentials_button")
+            ) {
                 Text("Cancel")
             }
         }

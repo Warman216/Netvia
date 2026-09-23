@@ -76,6 +76,9 @@ class HotspotViewModel(application: Application) : AndroidViewModel(application)
     private val _customPassword = MutableStateFlow(preferences.customPassword)
     val customPassword: StateFlow<String> = _customPassword.asStateFlow()
 
+    private val _hotspotMode = MutableStateFlow(preferences.hotspotMode)
+    val hotspotMode: StateFlow<String> = _hotspotMode.asStateFlow()
+
     private val _totalTriggers = MutableStateFlow(preferences.totalTriggersCount)
     val totalTriggers: StateFlow<Int> = _totalTriggers.asStateFlow()
 
@@ -87,6 +90,7 @@ class HotspotViewModel(application: Application) : AndroidViewModel(application)
     val isLoadingApps: StateFlow<Boolean> = _isLoadingApps.asStateFlow()
 
     init {
+        HotspotManager.initialize(context)
         refreshHealthStatus()
         loadInstalledApps()
 
@@ -144,7 +148,7 @@ class HotspotViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun stopManualHotspot() {
-        HotspotManager.stopHotspot()
+        HotspotManager.stopHotspot(context)
         viewModelScope.launch(Dispatchers.IO) {
             database.triggerLogDao().insertLog(
                 TriggerLogEntity(
@@ -233,17 +237,24 @@ class HotspotViewModel(application: Application) : AndroidViewModel(application)
         _vibrateOnTrigger.value = vibrate
     }
 
+    fun setHotspotMode(mode: String) {
+        preferences.hotspotMode = mode
+        _hotspotMode.value = mode
+    }
+
     fun updateCustomSsid(ssid: String) {
         val trimmed = ssid.trim()
         if (trimmed.isNotEmpty()) {
             preferences.customSsid = trimmed
             _customSsid.value = trimmed
+            HotspotManager.updateActiveCredentials(trimmed, _customPassword.value, context)
         }
     }
 
     fun updateCustomPassword(password: String) {
         preferences.customPassword = password
         _customPassword.value = password
+        HotspotManager.updateActiveCredentials(_customSsid.value, password, context)
     }
 
     fun clearLogs() {

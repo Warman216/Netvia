@@ -1,5 +1,9 @@
 package com.example.ui.components
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,27 +20,34 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.service.HotspotManager
 import com.example.ui.theme.GradientCyan
 import com.example.ui.theme.GradientElectricBlue
 import com.example.ui.theme.GradientMagenta
@@ -52,7 +63,17 @@ fun HotspotCredentialsCard(
     onConfigureClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
+    var showPassword by remember { mutableStateOf(false) }
+
+    fun copyToClipboard(label: String, text: String) {
+        try {
+            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText(label, text)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(context, "$label copied to clipboard!", Toast.LENGTH_SHORT).show()
+        } catch (_: Exception) {}
+    }
 
     LiquidGlassSquircleCard(
         modifier = modifier
@@ -109,7 +130,7 @@ fun HotspotCredentialsCard(
                             modifier = Modifier.size(15.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "Customize", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                        Text(text = "Change Password", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -127,7 +148,7 @@ fun HotspotCredentialsCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        clipboardManager.setText(AnnotatedString(customSsid))
+                        copyToClipboard("SSID", customSsid)
                     },
                 shape = SquircleMedium,
                 accentGlow = GradientElectricBlue,
@@ -181,7 +202,7 @@ fun HotspotCredentialsCard(
                     }
 
                     IconButton(
-                        onClick = { clipboardManager.setText(AnnotatedString(customSsid)) },
+                        onClick = { copyToClipboard("SSID", customSsid) },
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
@@ -201,7 +222,7 @@ fun HotspotCredentialsCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        clipboardManager.setText(AnnotatedString(customPassword))
+                        copyToClipboard("Password", customPassword)
                     },
                 shape = SquircleMedium,
                 accentGlow = GradientViolet,
@@ -247,7 +268,7 @@ fun HotspotCredentialsCard(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = customPassword,
+                                text = if (showPassword) customPassword else "•".repeat(customPassword.length.coerceAtLeast(8)),
                                 style = MaterialTheme.typography.titleSmall.copy(
                                     fontFamily = FontFamily.Monospace,
                                     fontWeight = FontWeight.Bold
@@ -257,18 +278,54 @@ fun HotspotCredentialsCard(
                         }
                     }
 
-                    IconButton(
-                        onClick = { clipboardManager.setText(AnnotatedString(customPassword)) },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "Copy Password",
-                            tint = GradientMagenta,
-                            modifier = Modifier.size(16.dp)
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = { showPassword = !showPassword },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = if (showPassword) "Hide password" else "Show password",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = { copyToClipboard("Password", customPassword) },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy Password",
+                                tint = GradientMagenta,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // 1-Tap Sync with Android System Hotspot
+            FilledTonalButton(
+                onClick = {
+                    copyToClipboard("Password", customPassword)
+                    HotspotManager.openTetheringSettings(context)
+                },
+                shape = SquircleMedium,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.OpenInNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Copy & Configure in Android Hotspot Settings",
+                    style = MaterialTheme.typography.labelMedium
+                )
             }
         }
     }

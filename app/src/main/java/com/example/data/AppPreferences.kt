@@ -41,17 +41,21 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_VIBRATE_ON_TRIGGER, true)
         set(value) = prefs.edit().putBoolean(KEY_VIBRATE_ON_TRIGGER, value).apply()
 
-    var customSsid: String
-        get() = prefs.getString(KEY_CUSTOM_SSID, "") ?: ""
-        set(value) = prefs.edit().putString(KEY_CUSTOM_SSID, value).apply()
-
-    var customPassword: String
-        get() = prefs.getString(KEY_CUSTOM_PASSWORD, "") ?: ""
-        set(value) = prefs.edit().putString(KEY_CUSTOM_PASSWORD, value).apply()
-
     var lastTriggerTimestamp: Long
         get() = prefs.getLong(KEY_LAST_TRIGGER_TIMESTAMP, 0L)
         set(value) = prefs.edit().putLong(KEY_LAST_TRIGGER_TIMESTAMP, value).apply()
+
+    var customSsid: String
+        get() = prefs.getString(KEY_CUSTOM_SSID, "netvia-hotspot") ?: "netvia-hotspot"
+        set(value) = prefs.edit().putString(KEY_CUSTOM_SSID, value).apply()
+
+    var customPassword: String
+        get() = prefs.getString(KEY_CUSTOM_PASSWORD, "netvia1234") ?: "netvia1234"
+        set(value) = prefs.edit().putString(KEY_CUSTOM_PASSWORD, value).apply()
+
+    var hotspotMode: String
+        get() = prefs.getString(KEY_HOTSPOT_MODE, HOTSPOT_MODE_INTERNET_SHARING) ?: HOTSPOT_MODE_INTERNET_SHARING
+        set(value) = prefs.edit().putString(KEY_HOTSPOT_MODE, value).apply()
 
     var totalTriggersCount: Int
         get() = prefs.getInt(KEY_TOTAL_TRIGGERS_COUNT, 0)
@@ -72,12 +76,16 @@ class AppPreferences(context: Context) {
         const val KEY_COOLDOWN_SECONDS = "cooldown_seconds"
         const val KEY_NOTIFY_ON_TRIGGER = "notify_on_trigger"
         const val KEY_VIBRATE_ON_TRIGGER = "vibrate_on_trigger"
+        const val KEY_LAST_TRIGGER_TIMESTAMP = "last_trigger_timestamp"
         const val KEY_CUSTOM_SSID = "custom_ssid"
         const val KEY_CUSTOM_PASSWORD = "custom_password"
-        const val KEY_LAST_TRIGGER_TIMESTAMP = "last_trigger_timestamp"
+        const val KEY_HOTSPOT_MODE = "hotspot_mode"
         const val KEY_TOTAL_TRIGGERS_COUNT = "total_triggers_count"
 
         const val FILTER_MODE_ALL = "ALL"
         const val FILTER_MODE_SELECTED = "SELECTED"
+
+        const val HOTSPOT_MODE_INTERNET_SHARING = "INTERNET_SHARING"
+        const val HOTSPOT_MODE_LOCAL_ONLY = "LOCAL_ONLY"
     }
 }
